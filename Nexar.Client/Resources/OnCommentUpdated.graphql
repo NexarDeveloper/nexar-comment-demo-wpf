@@ -1,0 +1,9 @@
+﻿subscription OnCommentUpdated($input: DesOnCommentUpdatedInput!) {
+  desOnCommentUpdated(input: $input) {
+    action
+    data {
+      projectGuid
+      threadGuid
+    }
+  }
+}

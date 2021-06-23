@@ -1,0 +1,9 @@
+﻿mutation CreateComment($input: DesCreateCommentInput!) {
+  desCreateComment(input: $input)
+  {
+    guid
+    errors {
+      message
+    }
+  }
+}
