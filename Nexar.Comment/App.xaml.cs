@@ -42,7 +42,13 @@ namespace Nexar.Comment
         {
             try
             {
-                Login = await LoginHelper.LoginAsync(Config.Authority);
+                var clientId = Environment.GetEnvironmentVariable("NEXAR_CLIENT_ID") ?? throw new InvalidOperationException("Please set environment 'NEXAR_CLIENT_ID'");
+                var clientSecret = Environment.GetEnvironmentVariable("NEXAR_CLIENT_SECRET") ?? throw new InvalidOperationException("Please set environment 'NEXAR_CLIENT_SECRET'");
+                Login = await LoginHelper.LoginAsync(
+                    clientId,
+                    clientSecret,
+                    new string[] { "user.access", "design.domain" },
+                    Config.Authority);
             }
             catch (Exception ex)
             {

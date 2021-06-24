@@ -1,5 +1,7 @@
 # Nexar.Comment Demo
 
+[nexar.com]: https://nexar.com/
+
 Demo Altium 365 comment browser powered by Nexar.
 
 **Projects:**
@@ -7,10 +9,14 @@ Demo Altium 365 comment browser powered by Nexar.
 - `Nexar.Comment` - WPF application, comment browser
 - `Nexar.Client` - GraphQL StrawberryShake client
 
-## How to use
+## Prerequisites
 
-In order to see anything useful in the app, you need your Altium Live
-credentials and have to be a member of at least one Altium 365 workspace.
+You need your Altium Live credentials and have to be a member of at least one Altium 365 workspace.
+
+In addition, you need an application at [nexar.com] with the Design scope.
+Use the application client ID and secret and set environment variables `NEXAR_CLIENT_ID` and `NEXAR_CLIENT_SECRET`.
+
+## How to use
 
 Open the solution in Visual Studio.
 Ensure `Nexar.Comment` is the startup project, build, run.
