@@ -157,7 +157,7 @@ namespace Nexar.Comment
                     using (new WaitCursor())
                     {
                         var dto = res.Data.DesOnCommentUpdated;
-                        OnCommentUpdated(dto.Action, dto.Data.ProjectGuid, dto.Data.ThreadGuid);
+                        OnCommentUpdated(dto.Action, dto.Data.ProjectId, dto.Data.CommentThreadId);
                     }
                 }));
             }
@@ -352,7 +352,7 @@ namespace Nexar.Comment
                         Task.Run(() => App.Client.CreateComment.ExecuteAsync(new DesCreateCommentInput
                         {
                             EntityId = thread.Project.Tag.Id,
-                            ThreadGuid = thread.Tag.CommentThreadId,
+                            CommentThreadId = thread.Tag.CommentThreadId,
                             Text = text
                         })).Wait();
 
@@ -450,8 +450,8 @@ namespace Nexar.Comment
                     Task.Run(() => App.Client.DeleteComment.ExecuteAsync(new DesDeleteCommentInput
                     {
                         EntityId = _ThreadTag.Project.Tag.Id,
-                        ThreadGuid = _ThreadTag.Tag.CommentThreadId,
-                        CommentGuid = comment.CommentId
+                        CommentThreadId = _ThreadTag.Tag.CommentThreadId,
+                        CommentId = comment.CommentId
                     })).Wait();
 
                     // refresh if subscription is off

@@ -2,8 +2,8 @@
   desOnCommentUpdated(input: $input) {
     action
     data {
-      projectGuid
-      threadGuid
+      projectId
+      commentThreadId
     }
   }
 }

@@ -1,7 +1,7 @@
 ﻿mutation CreateComment($input: DesCreateCommentInput!) {
   desCreateComment(input: $input)
   {
-    guid
+    commentId
     errors {
       message
     }
