@@ -21,7 +21,11 @@ Use the application client ID and secret and set environment variables `NEXAR_CL
 ## How to use
 
 Open the solution in Visual Studio.
-Ensure `Nexar.Comment` is the startup project, build, run.
+Ensure `Nexar.Comment` is the startup project, build, and run.
+
+If you run with the debugger then it may break due to "cannot read settings".
+Ignore and continue (<kbd>F5</kbd>). The settings are stored on exiting.
+Next runs should not have this issue.
 
 The identity server sign in page appears. Enter your credentials and click `Sign In`.
 
