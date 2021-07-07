@@ -307,6 +307,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>powershell -NoProfile -ExecutionPolicy Bypass -Command $(MSBuildProjectDirectory)\..\1.build.ps1 publish -Configuration $(ConfigurationName)</PostBuildEvent>
+    <PostBuildEvent>dotnet publish $(MSBuildProjectDirectory)\..\Nexar.Client\Nexar.Client.csproj -c $(ConfigurationName) -o $(MSBuildProjectDirectory)\bin\$(ConfigurationName)</PostBuildEvent>
   </PropertyGroup>
 </Project>

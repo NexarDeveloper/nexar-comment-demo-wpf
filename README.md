@@ -11,6 +11,8 @@ Demo Altium 365 comment browser powered by Nexar.
 
 ## Prerequisites
 
+Visual Studio 2019.
+
 You need your Altium Live credentials and have to be a member of at least one Altium 365 workspace.
 
 In addition, you need an application at [nexar.com] with the Design scope.
