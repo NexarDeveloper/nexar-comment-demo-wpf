@@ -155,9 +155,8 @@
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Nexar.Client.Login, Version=0.2.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nexar.Client.Login.0.2.1\lib\net472\Nexar.Client.Login.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Nexar.Client.Login, Version=0.2.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nexar.Client.Login.0.2.2\lib\net472\Nexar.Client.Login.dll</HintPath>
     </Reference>
     <Reference Include="StrawberryShake.Core, Version=11.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\StrawberryShake.Core.11.3.0\lib\netstandard2.0\StrawberryShake.Core.dll</HintPath>
