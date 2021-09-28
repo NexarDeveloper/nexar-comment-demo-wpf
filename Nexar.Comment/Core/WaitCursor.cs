@@ -5,7 +5,7 @@ namespace Nexar.Comment
 {
     public class WaitCursor : IDisposable
     {
-        Cursor _lastCursor;
+        readonly Cursor _lastCursor;
 
         public WaitCursor()
         {

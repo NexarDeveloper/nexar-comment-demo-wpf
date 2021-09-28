@@ -112,7 +112,7 @@ namespace Nexar.Comment
             {
                 var res = await App.Client.Projects.ExecuteAsync(workspace.Tag.Url);
                 ClientHelper.EnsureNoErrors(res);
-                return res.Data.DesProjects.Nodes;
+                return res.Data.DesProjects.Nodes.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase);
             }).Result;
 
             // populate

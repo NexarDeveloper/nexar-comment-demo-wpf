@@ -18,7 +18,7 @@ type Query {
   desTeam(workspaceUrl: String!): DesTeam!
   desUsers(workspaceUrl: String! ids: [String!]!): [DesUser]!
   "Search projects within a workspace with results in paged groups."
-  desProjects(first: Int after: String last: Int before: String "The web address of a workspace." workspaceUrl: String! "Optional filter for workflow modifications after the specific `DateTime`." modifiedWorkflowAfter: DateTime where: DesProjectFilterInput): DesProjectConnection
+  desProjects(first: Int after: String last: Int before: String "The web address of a workspace." workspaceUrl: String! "Optional filter for projects with workflows completed after the specific `DateTime`." completedWorkflowAfter: DateTime where: DesProjectFilterInput): DesProjectConnection
   "Search a specific project by its unique identifier."
   desProjectById("The node identifier for a project." id: ID!): DesProject
   desDesignItemById(id: ID!): DesDesignItem
@@ -61,8 +61,24 @@ type Mutation {
   desUpdateComment(input: DesUpdateCommentInput!): DesUpdateCommentPayload!
   desCreateCommentThread(input: DesCreateCommentThreadInput!): DesCreateCommentThreadPayload!
   desDeleteCommentThread(input: DesDeleteCommentThreadInput!): DesDeleteCommentThreadPayload!
+  "Creates a user."
+  desCreateUser(input: DesCreateUserInput!): DesCreateUserPayload!
+  "Deletes the specified user."
+  desDeleteUser(input: DesDeleteUserInput!): DesDeleteUserPayload!
+  "Updates the specified user properties."
+  desUpdateUser(input: DesUpdateUserInput!): DesUpdateUserPayload!
+  "Creates a new user group."
+  desCreateUserGroup(input: DesCreateUserGroupInput!): DesCreateUserGroupPayload!
+  "Deletes the specified user group."
+  desDeleteUserGroup(input: DesDeleteUserGroupInput!): DesDeleteUserGroupPayload!
+  "Updates the specified user group."
+  desUpdateUserGroup(input: DesUpdateUserGroupInput!): DesUpdateUserGroupPayload!
+  "Adds users to the specified group."
+  desAddUsersToGroup(input: DesAddUsersToGroupInput!): DesAddUsersToGroupPayload!
+  "Removes users from the specified group."
+  desRemoveUsersFromGroup(input: DesRemoveUsersFromGroupInput!): DesRemoveUsersFromGroupPayload!
   desLaunchWorkflow(input: DesLaunchWorkflowInput!): DesLaunchWorkflowPayload!
-  desDeleteWorkflows(input: DesDeleteWorkflowsInput!): DesDeleteWorkflowsPayload!
+  desTerminateWorkflows(input: DesTerminateWorkflowsInput!): DesTerminateWorkflowsPayload!
 }
 
 type Subscription {
@@ -76,6 +92,10 @@ interface Node {
 
 type DesAuthorizationToken {
   token: String!
+}
+
+type DesAddUsersToGroupPayload {
+  errors: [DesPayloadError!]!
 }
 
 type DesArea {
@@ -126,6 +146,7 @@ type DesComment {
   text: String!
 }
 
+"A comment context provides additional information about associations for a comment thread."
 type DesCommentContext {
   "The reference identifier for the document associated with a comment thread."
   documentId: String
@@ -177,6 +198,7 @@ type DesCommentThread {
   originalStateScreenshotUrl: String
   "The sequence number of this comment thread."
   threadNumber: Int!
+  "The information about properties related to this comment thread."
   context: DesCommentContext!
 }
 
@@ -184,22 +206,20 @@ type DesCommentThread {
 type DesComponent implements Node {
   "The node identifier for this component (used by `desComponentById`)."
   id: ID!
-  "The list of the part choices associated with this component."
-  manufacturerComponents: [DesManufacturerComponent!]!
+  "The component folder."
   folder: DesFolder
+  "The list of the part choices associated with this component."
+  manufacturerParts: [DesManufacturerPart!]!
+  "More component data, relatively expensive, recommended for individual components with `desComponentById`."
+  details: DesComponentDetails!
+  "The library label for this component."
+  name: String!
   "The additional information for this component."
   comment: String!
   "The summary of function or other performance details for this component."
   description: String!
-  "The library label for this component."
-  name: String!
+  "The component revision."
   revision: String!
-  "The list of the parameters describing this component."
-  parameters: [DesComponentParameter!]!
-  "The list of the symbols used for this component."
-  symbols: [DesSymbol!]!
-  "The list of the footprints used this component."
-  footprints: [DesFootprint!]!
   model3D: DesModel3D
 }
 
@@ -212,6 +232,15 @@ type DesComponentConnection {
   "A flattened list of the nodes."
   nodes: [DesComponent!]
   totalCount: Int!
+}
+
+type DesComponentDetails {
+  "The list of the parameters describing this component."
+  parameters: [DesComponentParameter!]!
+  "The list of the symbols used for this component."
+  symbols: [DesSymbol!]!
+  "The list of the footprints used this component."
+  footprints: [DesFootprint!]!
 }
 
 "An edge in a connection."
@@ -239,6 +268,14 @@ type DesCreateCommentThreadPayload {
   errors: [DesPayloadError!]!
 }
 
+type DesCreateUserGroupPayload {
+  id: ID!
+}
+
+type DesCreateUserPayload {
+  userId: String!
+}
+
 type DesDeleteCommentPayload {
   errors: [DesPayloadError!]!
 }
@@ -247,13 +284,12 @@ type DesDeleteCommentThreadPayload {
   errors: [DesPayloadError!]!
 }
 
-type DesDeleteWorkflowsError {
-  id: String!
-  message: String!
+type DesDeleteUserGroupPayload {
+  errors: [DesPayloadError!]!
 }
 
-type DesDeleteWorkflowsPayload {
-  errors: [DesDeleteWorkflowsError!]!
+type DesDeleteUserPayload {
+  errors: [DesPayloadError!]!
 }
 
 "A design manages all of the schematic, PCB, and BOM content for a project."
@@ -389,11 +425,13 @@ type DesManufacturePackage {
   name: String!
 }
 
-type DesManufacturerComponent {
-  name: String!
+type DesManufacturerPart {
+  supplierParts: [DesSupplierPart!]!
+  "The manufacturer company name."
+  companyName: String!
+  "The part number (MPN)."
   partNumber: String!
   priority: Int!
-  supplierComponents: [DesSupplierComponent!]!
 }
 
 type DesMention {
@@ -509,7 +547,7 @@ type DesPosition2D {
 
 "A project manages all development stages of the PCB\/PCA product lifecycle."
 type DesProject implements Node {
-  "The node identifier for this project (used by `DesProjectById`)."
+  "The node identifier for this project (used by `desProjectById`)."
   id: ID!
   "The account information for who created this project."
   createdBy: DesUser
@@ -521,13 +559,13 @@ type DesProject implements Node {
   previewUrl: String!
   "The list of workflows associated with this project."
   workflows("An option to search workflows that have been completed." isClosed: Boolean! = false "An option to search workflows that have been modified after a specific `DateTime`." modifiedAfter: DateTime where: DesWorkflowFilterInput): [DesWorkflow!]
-  "The `DateTime` of the most recent workflow activity associated with this project."
-  modifiedWorkflowAt: DateTime
-  "The unique address of this project on the web."
+  "The `DateTime` of the most recent workflow completion associated with this project."
+  completedWorkflowAt: DateTime
+  "The Altium 365 web address."
   url: Url!
   "The reference identifier for this project."
   projectId: String!
-  "The assigned name for this Project."
+  "The assigned name for this project."
   name: String
   "The summary of this project content or purpose."
   description: String
@@ -569,7 +607,9 @@ type DesRectangle {
 }
 
 "A release is a published version of a design with additional generated files for manufacturing."
-type DesRelease {
+type DesRelease implements Node {
+  "The node identifier for this release (used by `desReleaseById`)."
+  id: ID!
   "The list of variations contained in this release."
   variants(where: DesReleaseVariantFilterInput): [DesReleaseVariant!]!
   manufacturePackages: [DesManufacturePackage!]!
@@ -614,6 +654,10 @@ type DesReleaseVariant {
   name: String!
   "The list of schematic documents for this design variant."
   schematics: [DesSchematic!]!
+}
+
+type DesRemoveUsersFromGroupPayload {
+  errors: [DesPayloadError!]!
 }
 
 "A schematic contains the design parts and logical connections."
@@ -666,10 +710,26 @@ type DesStackup {
   stacks: [DesStack!]!
 }
 
-type DesSupplierComponent {
-  name: String!
+type DesSupplierPart {
+  "The supplier company name."
+  companyName: String!
+  "The part number (SKU)."
   partNumber: String!
-  priority: Int!
+  "Available for library components."
+  prices: [DesSupplierPrice!]
+  "Available for library components."
+  stocks: [DesSupplierStock!]
+}
+
+type DesSupplierPrice {
+  currency: String!
+  price: Decimal!
+  breakQuantity: Int!
+}
+
+type DesSupplierStock {
+  locationName: String!
+  quantity: Decimal!
 }
 
 type DesSymbol {
@@ -686,6 +746,16 @@ type DesSymbol {
 
 type DesTeam {
   users: [DesUser!]!
+  groups: [DesUserGroup!]!
+}
+
+type DesTerminateWorkflowsError {
+  id: String!
+  message: String!
+}
+
+type DesTerminateWorkflowsPayload {
+  errors: [DesTerminateWorkflowsError!]!
 }
 
 type DesTestPoints {
@@ -706,8 +776,18 @@ type DesUpdateCommentPayload {
   errors: [DesPayloadError!]!
 }
 
+type DesUpdateUserGroupPayload {
+  errors: [DesPayloadError!]!
+}
+
+type DesUpdateUserPayload {
+  errors: [DesPayloadError!]!
+}
+
 "A user information contains the identifier and nullable extra fields."
 type DesUser {
+  "Null if the user no longer exists."
+  groups: [DesUserGroup!]
   "The internal user ID."
   userId: String!
   "Null if the user no longer exists."
@@ -715,7 +795,17 @@ type DesUser {
   "Null if the user no longer exists."
   email: String
   "Null if the user no longer exists."
-  fullName: String
+  firstName: String
+  "Null if the user no longer exists."
+  lastName: String
+}
+
+"A user group information."
+type DesUserGroup implements Node {
+  "The node ID."
+  id: ID!
+  "The group name."
+  name: String!
 }
 
 type DesVia {
@@ -774,7 +864,7 @@ type DesWorkflow {
   "The `DateTime` for the completion of this workflow."
   endedAt: DateTime
   "The label for this workflow."
-  businessKey: String!
+  name: String!
   "The reference identifier for definition of this workflow."
   processDefinitionId: String!
   "The label for the definition of this workflow."
@@ -813,7 +903,7 @@ type DesWorkspace implements Node {
   "The list of members authorized for this workspace."
   team: DesTeam!
   "The list of projects managed in this workspace."
-  projects("An option to search projects with workflows that have been modified after a specific `DateTime`." modifiedWorkflowAfter: DateTime where: DesProjectFilterInput): [DesProject!]!
+  projects("An option to search projects with workflows that have been completed after a specific `DateTime`." completedWorkflowAfter: DateTime where: DesProjectFilterInput): [DesProject!]!
   "The list of workflow definitions in this workspace."
   workflowDefinitions(where: DesWorkflowDefinitionFilterInput): [DesWorkflowDefinition!]
   "The list of workflows in this workspace."
@@ -824,6 +914,8 @@ type DesWorkspace implements Node {
   url: String!
   "The summary of this workspace content or purpose."
   description: String
+  "Tells if the workspace is the current user default."
+  isDefault: Boolean!
 }
 
 "Information about pagination in a connection."
@@ -888,6 +980,13 @@ input DesComparableNullableOfDateTimeOperationFilterInput {
   nlte: DateTime
 }
 
+input DesAddUsersToGroupInput {
+  "The group node ID."
+  id: ID!
+  "User IDs."
+  userIds: [String!]!
+}
+
 input DesCreateCommentInput {
   entityId: ID!
   commentThreadId: String!
@@ -903,6 +1002,20 @@ input DesCreateCommentThreadInput {
   releaseId: String
 }
 
+input DesCreateUserGroupInput {
+  workspaceUrl: String!
+  name: String!
+}
+
+input DesCreateUserInput {
+  workspaceUrl: String!
+  userName: String!
+  password: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+}
+
 input DesDeleteCommentInput {
   entityId: ID!
   commentThreadId: String!
@@ -914,16 +1027,24 @@ input DesDeleteCommentThreadInput {
   commentThreadId: String!
 }
 
-input DesDeleteWorkflowsInput {
+input DesDeleteUserGroupInput {
+  "The group node ID."
+  id: ID!
+}
+
+input DesDeleteUserInput {
   workspaceUrl: String!
-  workflowIds: [String!]!
+  userId: String!
 }
 
 input DesLaunchWorkflowInput {
   workspaceUrl: String!
   workflowDefinitionId: String!
-  title: String
-  vars: [DesWorkflowVariableInput!]!
+  name: String
+  "The string variables."
+  variables: [DesWorkflowVariableInput!]!
+  "The attachment variables."
+  attachments: [DesWorkflowAttachmentVariableInput!]
 }
 
 input DesOnCommentUpdatedInput {
@@ -940,11 +1061,11 @@ input DesPosition2DInput {
 input DesProjectFilterInput {
   and: [DesProjectFilterInput!]
   or: [DesProjectFilterInput!]
-  "The unique address of this project on the web."
+  "The Altium 365 web address."
   url: DesUriFilterInput
   "The reference identifier for this project."
   projectId: DesStringOperationFilterInput
-  "The assigned name for this Project."
+  "The assigned name for this project."
   name: DesStringOperationFilterInput
   "The summary of this project content or purpose."
   description: DesStringOperationFilterInput
@@ -963,6 +1084,8 @@ input DesRectangleInput {
 input DesReleaseFilterInput {
   and: [DesReleaseFilterInput!]
   or: [DesReleaseFilterInput!]
+  "The node identifier for this release (used by `desReleaseById`)."
+  id: DesStringOperationFilterInput
   "The `DateTime` when this release was created."
   createdAt: DesComparableDateTimeOperationFilterInput
   "The summary of this release content or purpose."
@@ -981,6 +1104,13 @@ input DesReleaseVariantFilterInput {
   schematics: DesListFilterInputTypeOfDesSchematicFilterInput
 }
 
+input DesRemoveUsersFromGroupInput {
+  "The group node ID."
+  id: ID!
+  "User IDs."
+  userIds: [String!]!
+}
+
 "A schematic contains the design parts and logical connections."
 input DesSchematicFilterInput {
   and: [DesSchematicFilterInput!]
@@ -991,11 +1121,30 @@ input DesSchematicFilterInput {
   units: DesComparableInt32OperationFilterInput
 }
 
+input DesTerminateWorkflowsInput {
+  workspaceUrl: String!
+  workflowIds: [String!]!
+}
+
 input DesUpdateCommentInput {
   entityId: ID!
   commentThreadId: String!
   commentId: String!
   text: String!
+}
+
+input DesUpdateUserGroupInput {
+  "The group node ID."
+  id: ID!
+  "The group name."
+  name: String!
+}
+
+input DesUpdateUserInput {
+  workspaceUrl: String!
+  userId: String!
+  firstName: String
+  lastName: String
 }
 
 "A variant contains a specific configuration of a base design."
@@ -1006,6 +1155,13 @@ input DesWipVariantFilterInput {
   name: DesStringOperationFilterInput
   "The list of schematic documents for this design variant."
   schematics: DesListFilterInputTypeOfDesSchematicFilterInput
+}
+
+input DesWorkflowAttachmentVariableInput {
+  "The variable name."
+  name: String!
+  "Uploaded file references."
+  files: [String!]!
 }
 
 "A workflow definition contains a logical sequence of tasks."
@@ -1039,7 +1195,7 @@ input DesWorkflowFilterInput {
   "The `DateTime` for the completion of this workflow."
   endedAt: DesComparableNullableOfDateTimeOperationFilterInput
   "The label for this workflow."
-  businessKey: DesStringOperationFilterInput
+  name: DesStringOperationFilterInput
   "The reference identifier for definition of this workflow."
   processDefinitionId: DesStringOperationFilterInput
   "The label for the definition of this workflow."
@@ -1067,6 +1223,8 @@ input DesWorkspaceFilterInput {
   url: DesStringOperationFilterInput
   "The summary of this workspace content or purpose."
   description: DesStringOperationFilterInput
+  "Tells if the workspace is the current user default."
+  isDefault: DesBooleanOperationFilterInput
 }
 
 input DesListFilterInputTypeOfDesSchematicFilterInput {

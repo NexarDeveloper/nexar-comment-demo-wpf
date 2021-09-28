@@ -76,7 +76,7 @@ namespace Nexar.Comment
                 ;
                 var services = serviceCollection.BuildServiceProvider();
 
-                Client = services.GetRequiredService<NexarClient>(); ;
+                Client = services.GetRequiredService<NexarClient>();
                 var res = await Client.Workspaces.ExecuteAsync();
                 ClientHelper.EnsureNoErrors(res);
                 Workspaces = res.Data.DesWorkspaces;
