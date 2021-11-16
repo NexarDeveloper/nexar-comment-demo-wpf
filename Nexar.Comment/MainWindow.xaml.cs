@@ -410,7 +410,7 @@ namespace Nexar.Comment
 
                 void ShowProject(ProjectTag tag)
                 {
-                    Process.Start(tag.Tag.Url.AbsoluteUri);
+                    Process.Start(tag.Tag.Url);
                 }
 
                 if (item.Tag is ProjectTag projectTag)
