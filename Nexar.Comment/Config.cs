@@ -2,6 +2,12 @@ using System;
 
 namespace Nexar.Comment
 {
+    public enum NexarMode
+    {
+        Prod,
+        Dev
+    }
+
     /// <summary>
     /// App configuration. Different modes and endpoints are used for internal development.
     /// Clients usually use nexar.com endpoints.
@@ -10,24 +16,24 @@ namespace Nexar.Comment
     {
         public const string MyTitle = "Nexar.Comment";
 
-        public static A365Mode NexarA365Mode { get; }
+        public static NexarMode NexarMode { get; }
         public static string Authority { get; }
         public static string ApiEndpoint { get; set; }
 
         static Config()
         {
             // default mode
-            var mode = Environment.GetEnvironmentVariable("NEXAR_A365_MODE");
-            NexarA365Mode = mode == null ? A365Mode.Dev1 : (A365Mode)Enum.Parse(typeof(A365Mode), mode, true);
+            var mode = Environment.GetEnvironmentVariable("NEXAR_MODE") ?? "Prod";
+            NexarMode = (NexarMode)Enum.Parse(typeof(NexarMode), mode, true);
 
             // init mode related data
-            switch (NexarA365Mode)
+            switch (NexarMode)
             {
-                case A365Mode.Dev1:
+                case NexarMode.Prod:
                     Authority = "https://identity.nexar.com/";
                     ApiEndpoint = "https://api.nexar.com/graphql/";
                     break;
-                case A365Mode.Prod:
+                case NexarMode.Dev:
                     Authority = "https://identity.nexar.com/";
                     ApiEndpoint = "https://api.nexar.com/graphql/";
                     break;
@@ -37,22 +43,10 @@ namespace Nexar.Comment
         }
 
         /// <summary>
-        /// Gets true if comment change subscription is supported.
-        /// For the momemnt it is not supported by api.nexar.com.
+        /// Gets true if subscription is supported.
+        /// Not yet supported by Gateway.
         /// </summary>
         public static bool IsSubscription =>
-            ApiEndpoint.IndexOf("nexar.com") < 0;
-
-        /// <summary>
-        /// Subscription endpoint.
-        /// </summary>
-        public static string WebSocketEndpoint =>
-            "ws" + ApiEndpoint.Substring(ApiEndpoint.IndexOf(':'));
-
-        public enum A365Mode
-        {
-            Prod,
-            Dev1
-        }
+            ApiEndpoint.IndexOf("//api.") < 0;
     }
 }

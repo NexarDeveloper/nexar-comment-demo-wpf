@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Nexar.Client;
+﻿using Nexar.Client;
 using Nexar.Client.Login;
 using System;
 using System.Collections.Generic;
@@ -10,8 +9,8 @@ namespace Nexar.Comment
 {
     public partial class App : Application
     {
-        public static NexarClient Client { get; private set; }
         public static IReadOnlyList<IMyWorkspace> Workspaces { get; private set; }
+
         public static string Username => Login.Username;
 
         public static LoginInfo Login { get; private set; }
@@ -49,6 +48,8 @@ namespace Nexar.Comment
                     clientSecret,
                     new string[] { "user.access", "design.domain" },
                     Config.Authority);
+
+                NexarClientFactory.AccessToken = Login.AccessToken;
             }
             catch (Exception ex)
             {
@@ -61,23 +62,8 @@ namespace Nexar.Comment
         {
             try
             {
-                var serviceCollection = new ServiceCollection();
-                serviceCollection
-                    .AddNexarClient()
-                    .ConfigureHttpClient(c =>
-                    {
-                        c.BaseAddress = new Uri(Config.ApiEndpoint);
-                        c.DefaultRequestHeaders.Add("token", Login.AccessToken);
-                    })
-                    .ConfigureWebSocketClient(c =>
-                    {
-                        c.Uri = new Uri(Config.WebSocketEndpoint);
-                    })
-                ;
-                var services = serviceCollection.BuildServiceProvider();
-
-                Client = services.GetRequiredService<NexarClient>();
-                var res = await Client.Workspaces.ExecuteAsync();
+                var client = NexarClientFactory.GetClient(Config.ApiEndpoint);
+                var res = await client.Workspaces.ExecuteAsync();
                 ClientHelper.EnsureNoErrors(res);
                 Workspaces = res.Data.DesWorkspaces;
             }

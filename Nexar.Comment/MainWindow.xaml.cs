@@ -110,7 +110,8 @@ namespace Nexar.Comment
             // fetch projects
             var projects = Task.Run(async () =>
             {
-                var res = await App.Client.Projects.ExecuteAsync(workspace.Tag.Url);
+                var client = NexarClientFactory.GetClient(workspace.Tag.Location.ApiServiceUrl);
+                var res = await client.Projects.ExecuteAsync(workspace.Tag.Url);
                 ClientHelper.EnsureNoErrors(res);
                 return res.Data.DesProjects.Nodes.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase);
             }).Result;
@@ -126,12 +127,14 @@ namespace Nexar.Comment
         private void PopulateProjectItem(TreeViewItem item)
         {
             var project = (ProjectTag)item.Tag;
+            var workspace = project.Workspace;
             item.Items.Clear();
 
             // fetch threads
             var threads = Task.Run(async () =>
             {
-                var res = await App.Client.CommentThreads.ExecuteAsync(project.Tag.Id);
+                var client = NexarClientFactory.GetClient(workspace.Tag.Location.ApiServiceUrl);
+                var res = await client.CommentThreads.ExecuteAsync(project.Tag.Id);
                 ClientHelper.EnsureNoErrors(res);
                 return res.Data.DesCommentThreads;
             }).Result;
@@ -141,17 +144,18 @@ namespace Nexar.Comment
                 item.Items.Add(Tree.CreateItem(new ThreadTag(thread, project), false));
 
             // subscribe to comment updates once per workspace
-            if (project.Workspace.CommentSubscription == null && Config.IsSubscription)
+            if (workspace.CommentSubscription == null && Config.IsSubscription)
             {
                 // fetch OnCommentUpdated
-                var watch = App.Client.OnCommentUpdated.Watch(new DesOnCommentUpdatedInput
+                var client = NexarClientFactory.GetClient(workspace.Tag.Location.ApiServiceUrl);
+                var watch = client.OnCommentUpdated.Watch(new DesOnCommentUpdatedInput
                 {
-                    WorkspaceUrl = project.Workspace.Tag.Url,
+                    WorkspaceUrl = workspace.Tag.Url,
                     Token = App.Login.AccessToken
                 });
 
                 // subscribe
-                project.Workspace.CommentSubscription = watch.Subscribe(res => Application.Current.Dispatcher.Invoke(() =>
+                workspace.CommentSubscription = watch.Subscribe(res => Application.Current.Dispatcher.Invoke(() =>
                 {
                     ClientHelper.EnsureNoErrors(res);
                     using (new WaitCursor())
@@ -180,7 +184,8 @@ namespace Nexar.Comment
                 var thread1 = (ThreadTag)threadItem1.Tag;
 
                 // fetch new thread
-                var thread2 = Task.Run(() => App.Client.CommentThread.ExecuteAsync(
+                var client = NexarClientFactory.GetClient(thread1.Project.Workspace.Tag.Location.ApiServiceUrl);
+                var thread2 = Task.Run(() => client.CommentThread.ExecuteAsync(
                     thread1.Project.Tag.Id,
                     threadGuid)
                 ).Result.Data.DesCommentThread;
@@ -349,7 +354,8 @@ namespace Nexar.Comment
                     using (new WaitCursor())
                     {
                         // send mutation
-                        Task.Run(() => App.Client.CreateComment.ExecuteAsync(new DesCreateCommentInput
+                        var client = NexarClientFactory.GetClient(thread.Project.Workspace.Tag.Location.ApiServiceUrl);
+                        Task.Run(() => client.CreateComment.ExecuteAsync(new DesCreateCommentInput
                         {
                             EntityId = thread.Project.Tag.Id,
                             CommentThreadId = thread.Tag.CommentThreadId,
@@ -447,7 +453,8 @@ namespace Nexar.Comment
                 // delete
                 using (new WaitCursor())
                 {
-                    Task.Run(() => App.Client.DeleteComment.ExecuteAsync(new DesDeleteCommentInput
+                    var client = NexarClientFactory.GetClient(_ThreadTag.Project.Workspace.Tag.Location.ApiServiceUrl);
+                    Task.Run(() => client.DeleteComment.ExecuteAsync(new DesDeleteCommentInput
                     {
                         EntityId = _ThreadTag.Project.Tag.Id,
                         CommentThreadId = _ThreadTag.Tag.CommentThreadId,
