@@ -5,7 +5,8 @@ namespace Nexar.Comment
     public enum NexarMode
     {
         Prod,
-        Dev
+        Dev,
+        Uat
     }
 
     /// <summary>
@@ -34,6 +35,10 @@ namespace Nexar.Comment
                     ApiEndpoint = "https://api.nexar.com/graphql/";
                     break;
                 case NexarMode.Dev:
+                    Authority = "https://identity.nexar.com/";
+                    ApiEndpoint = "https://api.nexar.com/graphql/";
+                    break;
+                case NexarMode.Uat:
                     Authority = "https://identity.nexar.com/";
                     ApiEndpoint = "https://api.nexar.com/graphql/";
                     break;

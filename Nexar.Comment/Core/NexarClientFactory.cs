@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Nexar.Comment;
 using System;
 using System.Collections.Concurrent;
 using System.Net.Http.Headers;
@@ -28,13 +29,14 @@ namespace Nexar.Client
             if (string.IsNullOrEmpty(AccessToken))
                 throw new ArgumentNullException(nameof(AccessToken));
 
+
             var endpointUri = new Uri(endpoint);
             return _clients.GetOrAdd(endpointUri.AbsoluteUri, _ => CreateClient(endpointUri));
         }
 
         private static NexarClient CreateClient(Uri endpoint)
         {
-            var webSocket = new Uri((endpoint.Scheme == "https" ? "wss://" : "ws://") + endpoint.Host + endpoint.LocalPath);
+            var webSocket = new Uri((endpoint.Scheme == "https" ? "wss://" : "ws://") + endpoint.Authority + endpoint.LocalPath);
 
             var serviceCollection = new ServiceCollection();
             serviceCollection
