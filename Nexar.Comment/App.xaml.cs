@@ -1,4 +1,4 @@
-﻿using Nexar.Client;
+using Nexar.Client;
 using Nexar.Client.Login;
 using System;
 using System.Collections.Generic;
@@ -10,10 +10,6 @@ namespace Nexar.Comment
     public partial class App : Application
     {
         public static IReadOnlyList<IMyWorkspace> Workspaces { get; private set; }
-
-        public static string Username => Login.Username;
-
-        public static LoginInfo Login { get; private set; }
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
@@ -43,13 +39,13 @@ namespace Nexar.Comment
             {
                 var clientId = Environment.GetEnvironmentVariable("NEXAR_CLIENT_ID") ?? throw new InvalidOperationException("Please set environment 'NEXAR_CLIENT_ID'");
                 var clientSecret = Environment.GetEnvironmentVariable("NEXAR_CLIENT_SECRET") ?? throw new InvalidOperationException("Please set environment 'NEXAR_CLIENT_SECRET'");
-                Login = await LoginHelper.LoginAsync(
+                var login = await LoginHelper.LoginAsync(
                     clientId,
                     clientSecret,
                     new string[] { "user.access", "design.domain" },
                     Config.Authority);
 
-                NexarClientFactory.AccessToken = Login.AccessToken;
+                NexarClientFactory.AccessToken = login.AccessToken;
             }
             catch (Exception ex)
             {

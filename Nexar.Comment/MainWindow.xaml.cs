@@ -151,7 +151,7 @@ namespace Nexar.Comment
                 var watch = client.OnCommentUpdated.Watch(new DesOnCommentUpdatedInput
                 {
                     WorkspaceUrl = workspace.Tag.Url,
-                    Token = App.Login.AccessToken
+                    Token = NexarClientFactory.AccessToken
                 });
 
                 // subscribe
@@ -435,10 +435,6 @@ namespace Nexar.Comment
                 // skip if no selected item
                 var comment = (dynamic)MyList.SelectedItem;
                 if (comment == null)
-                    return;
-
-                // skip if not user comment unless Ctrl+Shift
-                if (comment.Name != App.Username && Keyboard.Modifiers != (ModifierKeys.Control | ModifierKeys.Shift))
                     return;
 
                 // confirm

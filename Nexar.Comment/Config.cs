@@ -2,16 +2,8 @@ using System;
 
 namespace Nexar.Comment
 {
-    public enum NexarMode
-    {
-        Prod,
-        Dev,
-        Uat
-    }
-
     /// <summary>
-    /// App configuration. Different modes and endpoints are used for internal development.
-    /// Clients usually use nexar.com endpoints.
+    /// App configuration.
     /// </summary>
     static class Config
     {
@@ -34,14 +26,6 @@ namespace Nexar.Comment
                     Authority = "https://identity.nexar.com/";
                     ApiEndpoint = "https://api.nexar.com/graphql/";
                     break;
-                case NexarMode.Dev:
-                    Authority = "https://identity.nexar.com/";
-                    ApiEndpoint = "https://api.nexar.com/graphql/";
-                    break;
-                case NexarMode.Uat:
-                    Authority = "https://identity.nexar.com/";
-                    ApiEndpoint = "https://api.nexar.com/graphql/";
-                    break;
                 default:
                     throw new Exception();
             }
@@ -53,5 +37,10 @@ namespace Nexar.Comment
         /// </summary>
         public static bool IsSubscription =>
             ApiEndpoint.IndexOf("//api.") < 0;
+    }
+
+    public enum NexarMode
+    {
+        Prod,
     }
 }
