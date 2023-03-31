@@ -29,6 +29,9 @@ namespace Nexar.Client
             if (string.IsNullOrEmpty(AccessToken))
                 throw new ArgumentNullException(nameof(AccessToken));
 
+            // use the original endpoint for subscriptions
+            if (Config.IsSubscription)
+                endpoint = Config.ApiEndpoint;
 
             var endpointUri = new Uri(endpoint);
             return _clients.GetOrAdd(endpointUri.AbsoluteUri, _ => CreateClient(endpointUri));

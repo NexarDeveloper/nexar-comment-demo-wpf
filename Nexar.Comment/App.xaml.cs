@@ -1,4 +1,4 @@
-using Nexar.Client;
+﻿using Nexar.Client;
 using Nexar.Client.Login;
 using System;
 using System.Collections.Generic;
@@ -10,20 +10,6 @@ namespace Nexar.Comment
     public partial class App : Application
     {
         public static IReadOnlyList<IMyWorkspace> Workspaces { get; private set; }
-
-        private void Application_Startup(object sender, StartupEventArgs e)
-        {
-            var args = e.Args;
-            if (args.Length > 1)
-            {
-                MessageBox.Show("Usage: [endpoint]", Config.MyTitle, MessageBoxButton.OK, MessageBoxImage.Asterisk);
-                Environment.Exit(1);
-            }
-
-            // custom api endpoint
-            if (args.Length > 0 && !args[0].StartsWith("-"))
-                Config.ApiEndpoint = args[0];
-        }
 
         /// <summary>
         /// Run this as a task after the window is shown.
@@ -37,15 +23,22 @@ namespace Nexar.Comment
         {
             try
             {
-                var clientId = Environment.GetEnvironmentVariable("NEXAR_CLIENT_ID") ?? throw new InvalidOperationException("Please set environment 'NEXAR_CLIENT_ID'");
-                var clientSecret = Environment.GetEnvironmentVariable("NEXAR_CLIENT_SECRET") ?? throw new InvalidOperationException("Please set environment 'NEXAR_CLIENT_SECRET'");
-                var login = await LoginHelper.LoginAsync(
-                    clientId,
-                    clientSecret,
-                    new string[] { "user.access", "design.domain" },
-                    Config.Authority);
+                if (Config.Authority.StartsWith("http"))
+                {
+                    var clientId = Environment.GetEnvironmentVariable("NEXAR_CLIENT_ID") ?? throw new InvalidOperationException("Please set environment 'NEXAR_CLIENT_ID'");
+                    var clientSecret = Environment.GetEnvironmentVariable("NEXAR_CLIENT_SECRET") ?? throw new InvalidOperationException("Please set environment 'NEXAR_CLIENT_SECRET'");
+                    var login = await LoginHelper.LoginAsync(
+                        clientId,
+                        clientSecret,
+                        new string[] { "user.access", "design.domain" },
+                        Config.Authority);
 
-                NexarClientFactory.AccessToken = login.AccessToken;
+                    NexarClientFactory.AccessToken = login.AccessToken;
+                }
+                else
+                {
+                    NexarClientFactory.AccessToken = Config.Authority;
+                }
             }
             catch (Exception ex)
             {

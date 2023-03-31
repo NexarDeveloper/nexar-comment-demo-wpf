@@ -9,26 +9,13 @@ namespace Nexar.Comment
     {
         public const string MyTitle = "Nexar.Comment";
 
-        public static NexarMode NexarMode { get; }
-        public static string Authority { get; }
-        public static string ApiEndpoint { get; set; }
+        public static string Authority { get; private set; }
+        public static string ApiEndpoint { get; private set; }
 
         static Config()
         {
-            // default mode
-            var mode = Environment.GetEnvironmentVariable("NEXAR_MODE") ?? "Prod";
-            NexarMode = (NexarMode)Enum.Parse(typeof(NexarMode), mode, true);
-
-            // init mode related data
-            switch (NexarMode)
-            {
-                case NexarMode.Prod:
-                    Authority = "https://identity.nexar.com/";
-                    ApiEndpoint = "https://api.nexar.com/graphql/";
-                    break;
-                default:
-                    throw new Exception();
-            }
+            Authority = Environment.GetEnvironmentVariable("NEXAR_AUTHORITY") ?? "https://identity.nexar.com";
+            ApiEndpoint = Environment.GetEnvironmentVariable("NEXAR_API_URL") ?? "https://api.nexar.com/graphql";
         }
 
         /// <summary>
@@ -37,10 +24,5 @@ namespace Nexar.Comment
         /// </summary>
         public static bool IsSubscription =>
             ApiEndpoint.IndexOf("//api.") < 0;
-    }
-
-    public enum NexarMode
-    {
-        Prod,
     }
 }
