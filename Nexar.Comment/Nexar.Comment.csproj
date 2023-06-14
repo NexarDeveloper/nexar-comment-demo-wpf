@@ -6,7 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Nexar.Client.Login" Version="0.3.0" />
+    <PackageReference Include="Nexar.Client.Login" Version="0.3.1" />
     <PackageReference Include="System.Reactive.Linq" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
