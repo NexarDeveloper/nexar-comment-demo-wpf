@@ -9,8 +9,9 @@ namespace Nexar.Comment
     {
         public const string MyTitle = "Nexar.Comment";
 
-        public static string Authority { get; private set; }
-        public static string ApiEndpoint { get; private set; }
+        public static string Authority { get; }
+        public static string ApiEndpoint { get; }
+        public static string AccessToken { get; set; }
 
         static Config()
         {
@@ -20,9 +21,8 @@ namespace Nexar.Comment
 
         /// <summary>
         /// Gets true if subscription is supported.
-        /// Not yet supported by Gateway.
+        /// Not yet supported by public services.
         /// </summary>
-        public static bool IsSubscription =>
-            ApiEndpoint.IndexOf("//api.") < 0;
+        public static bool IsSubscription => !ApiEndpoint.Contains("//api.");
     }
 }

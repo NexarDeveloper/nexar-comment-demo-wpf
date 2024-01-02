@@ -1,6 +1,5 @@
 ﻿mutation DeleteComment($input: DesDeleteCommentInput!) {
-  desDeleteComment(input: $input)
-  {
+  desDeleteComment(input: $input) {
     errors {
       message
     }

@@ -1,6 +1,5 @@
 ﻿mutation CreateComment($input: DesCreateCommentInput!) {
-  desCreateComment(input: $input)
-  {
+  desCreateComment(input: $input) {
     commentId
     errors {
       message
